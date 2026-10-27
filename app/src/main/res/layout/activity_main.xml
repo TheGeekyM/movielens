@@ -4,75 +4,109 @@
     <androidx.camera.view.PreviewView android:id="@+id/preview"
         android:layout_width="match_parent" android:layout_height="match_parent" />
 
-    <com.movielens.Overlay android:id="@+id/overlay"
+    <com.movielens.Tags android:id="@+id/tags"
         android:layout_width="match_parent" android:layout_height="match_parent"
-        android:contentDescription="Poster frame. Tap a poster to frame and identify it." />
+        android:contentDescription="Every detected title with its rating. Tap one for details." />
 
-    <TextView android:id="@+id/status"
+    <!-- Status pill; the spinner shows while scanning or fetching ratings. -->
+    <LinearLayout android:id="@+id/pill"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal" android:layout_marginTop="56dp"
-        android:background="@drawable/pill" android:paddingHorizontal="18dp" android:paddingVertical="10dp"
-        android:text="Frame a poster, then tap ✦" android:textColor="#FFFFFF" android:textSize="14sp" />
+        android:background="@drawable/pill" android:gravity="center_vertical" android:orientation="horizontal"
+        android:paddingHorizontal="16dp" android:paddingVertical="9dp" android:animateLayoutChanges="true">
+        <ProgressBar android:id="@+id/spinner"
+            android:layout_width="16dp" android:layout_height="16dp" android:layout_marginEnd="10dp"
+            android:indeterminate="true" android:indeterminateTint="#F5C518" android:visibility="gone" />
+        <TextView android:id="@+id/status"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Hold steady on the screen" android:textColor="#FFFFFF" android:textSize="14sp" />
+    </LinearLayout>
+
+    <TextView android:id="@+id/menu"
+        android:layout_width="44dp" android:layout_height="44dp"
+        android:layout_gravity="top|end" android:layout_marginTop="52dp" android:layout_marginEnd="14dp"
+        android:background="@drawable/pill" android:gravity="center"
+        android:text="☰" android:textColor="#FFFFFF" android:textSize="20sp"
+        android:contentDescription="Menu: watchlist, history, filters, settings" />
 
     <LinearLayout android:id="@+id/card"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_gravity="bottom" android:layout_marginHorizontal="16dp" android:layout_marginBottom="136dp"
-        android:background="@drawable/card" android:orientation="vertical" android:padding="22dp"
-        android:visibility="gone" android:elevation="12dp"
+        android:layout_gravity="bottom" android:layout_marginHorizontal="14dp" android:layout_marginBottom="28dp"
+        android:background="@drawable/card" android:orientation="vertical" android:padding="18dp"
+        android:visibility="gone" android:elevation="16dp"
         android:clickable="true" android:focusable="true" android:foreground="?android:attr/selectableItemBackground"
         android:contentDescription="Open on IMDb">
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:gravity="center_vertical" android:orientation="horizontal">
-            <TextView android:id="@+id/type"
-                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:textAllCaps="true" android:letterSpacing="0.15" android:textColor="#99FFFFFF"
-                android:textSize="11sp" android:textStyle="bold" />
-            <TextView android:id="@+id/age"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@drawable/badge_age" android:paddingHorizontal="10dp" android:paddingVertical="3dp"
-                android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+
+            <com.movielens.RatingRing android:id="@+id/ring"
+                android:layout_width="76dp" android:layout_height="76dp"
+                android:contentDescription="IMDb rating" />
+
+            <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:layout_marginStart="16dp" android:orientation="vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:gravity="center_vertical" android:orientation="horizontal">
+                    <TextView android:id="@+id/type"
+                        android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                        android:textAllCaps="true" android:letterSpacing="0.12" android:textColor="#99FFFFFF"
+                        android:textSize="11sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end" />
+                    <TextView android:id="@+id/age"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:background="@drawable/badge_age" android:paddingHorizontal="8dp" android:paddingVertical="2dp"
+                        android:textColor="#FFFFFF" android:textSize="11sp" android:textStyle="bold" />
+                </LinearLayout>
+                <TextView android:id="@+id/title"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp"
+                    android:textColor="#FFFFFF" android:textSize="22sp" android:textStyle="bold" android:maxLines="2"
+                    android:ellipsize="end" android:fontFamily="sans-serif-condensed" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+                    <TextView android:id="@+id/votes"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:textColor="#B3FFFFFF" android:textSize="13sp" />
+                    <TextView android:id="@+id/reload"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="10dp"
+                        android:background="@drawable/chip" android:paddingHorizontal="12dp" android:paddingVertical="5dp"
+                        android:text="↻ Retry" android:textColor="#F5C518" android:textSize="13sp" android:textStyle="bold"
+                        android:visibility="gone" android:contentDescription="Fetch the IMDb rating again" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
-        <TextView android:id="@+id/title"
-            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp"
-            android:textColor="#FFFFFF" android:textSize="26sp" android:textStyle="bold" android:maxLines="2"
-            android:ellipsize="end" android:fontFamily="sans-serif-condensed" />
+        <TextView android:id="@+id/scores"
+            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp"
+            android:textColor="#E6FFFFFF" android:textSize="13sp" android:textStyle="bold" android:visibility="gone" />
 
-        <TextView android:id="@+id/year"
-            android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp"
-            android:textColor="#F5C518" android:textSize="16sp" android:textStyle="bold" />
+        <TextView android:id="@+id/plot"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+            android:textColor="#B3FFFFFF" android:textSize="13sp" android:maxLines="3" android:ellipsize="end"
+            android:lineSpacingExtra="2dp" android:visibility="gone" />
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="14dp" android:gravity="center_vertical" android:orientation="horizontal">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@drawable/badge_imdb" android:paddingHorizontal="8dp" android:paddingVertical="2dp"
-                android:text="IMDb ↗" android:textColor="#000000" android:textSize="15sp" android:textStyle="bold" />
-            <TextView android:id="@+id/rating"
-                android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp"
-                android:textColor="#F5C518" android:textSize="34sp" android:textStyle="bold" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="/10" android:textColor="#80FFFFFF" android:textSize="16sp" />
-            <TextView android:id="@+id/votes"
-                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
-                android:gravity="end" android:textColor="#CCFFFFFF" android:textSize="14sp" />
-        </LinearLayout>
+        <TextView android:id="@+id/watch"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+            android:textColor="#E6FFFFFF" android:textSize="13sp" android:maxLines="2" android:ellipsize="end" android:visibility="gone" />
 
         <LinearLayout android:id="@+id/genres"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="14dp" android:orientation="horizontal" />
+            android:layout_marginTop="12dp" android:orientation="horizontal" />
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="14dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <TextView android:id="@+id/trailer"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:background="@drawable/chip" android:gravity="center" android:paddingVertical="9dp"
+                android:text="▶  Trailer" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+            <TextView android:id="@+id/save"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:layout_marginHorizontal="8dp"
+                android:background="@drawable/chip" android:gravity="center" android:paddingVertical="9dp"
+                android:text="☆  Save" android:textColor="#FFFFFF" android:textSize="13sp" android:textStyle="bold" />
+            <TextView android:id="@+id/imdb"
+                android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                android:background="@drawable/badge_imdb" android:gravity="center" android:paddingVertical="9dp"
+                android:text="IMDb ↗" android:textColor="#000000" android:textSize="13sp" android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- Shutter: yellow disc in a white ring; a spinning arc wraps it while the AI works. -->
-    <FrameLayout android:layout_width="96dp" android:layout_height="96dp"
-        android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="28dp">
-        <ProgressBar android:id="@+id/spinner"
-            android:layout_width="match_parent" android:layout_height="match_parent"
-            android:indeterminate="true" android:indeterminateTint="#F5C518" android:visibility="invisible" />
-        <TextView android:id="@+id/identify"
-            android:layout_width="76dp" android:layout_height="76dp" android:layout_gravity="center"
-            android:background="@drawable/shutter" android:gravity="center"
-            android:text="✦" android:textColor="#121214" android:textSize="30sp"
-            android:elevation="8dp" android:contentDescription="Identify the framed movie" />
-    </FrameLayout>
 </FrameLayout>
