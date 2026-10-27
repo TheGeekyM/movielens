@@ -22,11 +22,10 @@
             android:text="Hold steady on the screen" android:textColor="#FFFFFF" android:textSize="14sp" />
     </LinearLayout>
 
-    <TextView android:id="@+id/menu"
+    <ImageView android:id="@+id/menu"
         android:layout_width="44dp" android:layout_height="44dp"
         android:layout_gravity="top|end" android:layout_marginTop="52dp" android:layout_marginEnd="14dp"
-        android:background="@drawable/pill" android:gravity="center"
-        android:text="☰" android:textColor="#FFFFFF" android:textSize="20sp"
+        android:background="@drawable/pill" android:padding="11dp" android:src="@drawable/ic_menu"
         android:contentDescription="Menu: watchlist, history, filters, settings" />
 
     <LinearLayout android:id="@+id/card"

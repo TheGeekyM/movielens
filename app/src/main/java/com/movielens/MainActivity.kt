@@ -1,9 +1,14 @@
 package com.movielens
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -12,6 +17,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.InputType
+import android.text.TextUtils
+import android.util.TypedValue
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.ImageView
 import android.util.Base64
 import android.view.MotionEvent
 import android.view.View
@@ -22,6 +32,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.camera.view.LifecycleCameraController
 import androidx.lifecycle.lifecycleScope
 import com.anthropic.client.AnthropicClient
@@ -373,19 +384,66 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         b.save.text = if (isSaved(m)) "★  Saved" else "☆  Save"
     }
 
+    /** Bottom sheet: tinted line icons, live subtitles, a real switch for parental mode. */
     private fun menu() {
-        val opts = arrayOf("★  Watchlist", "🕘  History", "🎯  Taste filter",
-            if (store.parental) "🔞  Parental mode: ON" else "🔞  Parental mode: OFF", "⚙  API settings")
-        AlertDialog.Builder(this).setItems(opts) { _, w ->
-            when (w) {
-                0 -> showList("watchlist", "Watchlist")
-                1 -> showList("history", "History")
-                2 -> taste()
-                3 -> { store.parental = !store.parental; items.indices.forEach(::styleTag)
-                    Toast.makeText(this, if (store.parental) "Parental mode on: 18+ titles are faded" else "Parental mode off", Toast.LENGTH_SHORT).show() }
-                4 -> settings()
+        val dp = resources.displayMetrics.density
+        val sheet = Dialog(this)
+        val box = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL; setBackgroundResource(R.drawable.sheet)
+            setPadding((12 * dp).toInt(), (10 * dp).toInt(), (12 * dp).toInt(), (24 * dp).toInt())
+        }
+        box.addView(View(this).apply { setBackgroundResource(R.drawable.handle) },
+            LinearLayout.LayoutParams((36 * dp).toInt(), (4 * dp).toInt()).apply { gravity = Gravity.CENTER_HORIZONTAL; bottomMargin = (14 * dp).toInt() })
+
+        fun row(icon: Int, tint: Int, title: String, sub: String, trailing: View? = null, onTap: (() -> Unit)?) {
+            val r = LinearLayout(this).apply {
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding((10 * dp).toInt(), (11 * dp).toInt(), (10 * dp).toInt(), (11 * dp).toInt())
+                background = getDrawable(TypedValue().also { theme.resolveAttribute(android.R.attr.selectableItemBackground, it, true) }.resourceId)
+                if (onTap != null) setOnClickListener { sheet.dismiss(); onTap() }
             }
-        }.show()
+            r.addView(ImageView(this).apply {
+                setImageResource(icon); imageTintList = ColorStateList.valueOf(tint)
+                setBackgroundResource(R.drawable.icon_bg); backgroundTintList = ColorStateList.valueOf(tint and 0x00FFFFFF or 0x26000000)
+                setPadding((9 * dp).toInt(), (9 * dp).toInt(), (9 * dp).toInt(), (9 * dp).toInt())
+            }, LinearLayout.LayoutParams((42 * dp).toInt(), (42 * dp).toInt()))
+            r.addView(LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                addView(TextView(context).apply { text = title; setTextColor(0xFFFFFFFF.toInt()); textSize = 16f; typeface = Typeface.DEFAULT_BOLD })
+                addView(TextView(context).apply { text = sub; setTextColor(0x99FFFFFF.toInt()); textSize = 13f; maxLines = 1; ellipsize = TextUtils.TruncateAt.END })
+            }, LinearLayout.LayoutParams(0, -2, 1f).apply { marginStart = (14 * dp).toInt() })
+            r.addView(trailing ?: ImageView(this).apply { setImageResource(R.drawable.ic_chevron); imageTintList = ColorStateList.valueOf(0x66FFFFFF) },
+                LinearLayout.LayoutParams(-2, -2))
+            box.addView(r)
+        }
+
+        val saved = store.list("watchlist").size
+        val seen = store.list("history").size
+        val taste = listOfNotNull(
+            store.minRating.takeIf { it > 0 }?.let { "Min %.1f".format(it) },
+            store.likes.takeIf { it.isNotBlank() }?.let { "likes ${it.trim()}" },
+            store.dislikes.takeIf { it.isNotBlank() }?.let { "hiding ${it.trim()}" }).joinToString(" · ").ifEmpty { "Off" }
+        row(R.drawable.ic_bookmark, 0xFFF5C518.toInt(), "Watchlist", if (saved == 0) "Long-press a poster to save it" else "$saved saved") { showList("watchlist", "Watchlist") }
+        row(R.drawable.ic_history, 0xFF5AA9FF.toInt(), "History", if (seen == 0) "Nothing yet" else "$seen titles looked up") { showList("history", "History") }
+        row(R.drawable.ic_tune, 0xFF2ECC71.toInt(), "Taste filter", taste) { taste() }
+        val sw = SwitchCompat(this).apply {
+            isChecked = store.parental
+            thumbTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(0xFFF5C518.toInt(), 0xFFBDBDBD.toInt()))
+            trackTintList = ColorStateList(arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()), intArrayOf(0x80F5C518.toInt(), 0x40FFFFFF))
+            setOnCheckedChangeListener { _, on -> store.parental = on; items.indices.forEach(::styleTag) }
+        }
+        row(R.drawable.ic_shield, 0xFFE5484D.toInt(), "Parental mode", "Fade out 18+ titles", sw, null)
+        row(R.drawable.ic_key, 0xFFB18CFF.toInt(), "API settings", if (store.server.isBlank()) "Direct to Claude" else "Via your server") { settings() }
+
+        sheet.setContentView(box)
+        sheet.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            setGravity(Gravity.BOTTOM)
+            setWindowAnimations(R.style.SheetAnim)
+            setDimAmount(0.5f)
+        }
+        sheet.show()
     }
 
     private fun showList(name: String, title: String) {
