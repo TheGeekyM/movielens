@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- viewfinder corners -->
+    <path android:strokeColor="#121214" android:strokeWidth="5" android:strokeLineCap="round" android:fillColor="#00000000"
+        android:pathData="M30,42 L30,30 L42,30 M66,30 L78,30 L78,42 M78,66 L78,78 L66,78 M42,78 L30,78 L30,66" />
+    <!-- star -->
+    <path android:fillColor="#121214"
+        android:pathData="M54,37 L58.8,48.6 L71.3,49.6 L61.8,57.7 L64.7,70 L54,63.4 L43.3,70 L46.2,57.7 L36.7,49.6 L49.2,48.6 Z" />
+</vector>
