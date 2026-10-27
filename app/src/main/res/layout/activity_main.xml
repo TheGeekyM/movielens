@@ -4,22 +4,19 @@
     <androidx.camera.view.PreviewView android:id="@+id/preview"
         android:layout_width="match_parent" android:layout_height="match_parent" />
 
+    <com.movielens.Overlay android:id="@+id/overlay"
+        android:layout_width="match_parent" android:layout_height="match_parent"
+        android:contentDescription="Poster frame. Tap a poster to frame and identify it." />
+
     <TextView android:id="@+id/status"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="top|start" android:layout_marginTop="56dp" android:layout_marginStart="16dp"
+        android:layout_gravity="top|center_horizontal" android:layout_marginTop="56dp"
         android:background="@drawable/pill" android:paddingHorizontal="18dp" android:paddingVertical="10dp"
-        android:text="Point at a poster or a title" android:textColor="#FFFFFF" android:textSize="14sp" />
-
-    <TextView android:id="@+id/identify"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_gravity="top|end" android:layout_marginTop="52dp" android:layout_marginEnd="16dp"
-        android:background="@drawable/badge_imdb" android:paddingHorizontal="16dp" android:paddingVertical="10dp"
-        android:text="✦ Identify" android:textColor="#000000" android:textSize="14sp" android:textStyle="bold"
-        android:elevation="8dp" android:contentDescription="Identify poster with AI" />
+        android:text="Frame a poster, then tap ✦" android:textColor="#FFFFFF" android:textSize="14sp" />
 
     <LinearLayout android:id="@+id/card"
         android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:layout_gravity="bottom" android:layout_margin="16dp" android:layout_marginBottom="32dp"
+        android:layout_gravity="bottom" android:layout_marginHorizontal="16dp" android:layout_marginBottom="136dp"
         android:background="@drawable/card" android:orientation="vertical" android:padding="22dp"
         android:visibility="gone" android:elevation="12dp"
         android:clickable="true" android:focusable="true" android:foreground="?android:attr/selectableItemBackground"
@@ -65,4 +62,17 @@
             android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="14dp" android:orientation="horizontal" />
     </LinearLayout>
+
+    <!-- Shutter: yellow disc in a white ring; a spinning arc wraps it while the AI works. -->
+    <FrameLayout android:layout_width="96dp" android:layout_height="96dp"
+        android:layout_gravity="bottom|center_horizontal" android:layout_marginBottom="28dp">
+        <ProgressBar android:id="@+id/spinner"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:indeterminate="true" android:indeterminateTint="#F5C518" android:visibility="invisible" />
+        <TextView android:id="@+id/identify"
+            android:layout_width="76dp" android:layout_height="76dp" android:layout_gravity="center"
+            android:background="@drawable/shutter" android:gravity="center"
+            android:text="✦" android:textColor="#121214" android:textSize="30sp"
+            android:elevation="8dp" android:contentDescription="Identify the framed movie" />
+    </FrameLayout>
 </FrameLayout>
